@@ -54,6 +54,7 @@ var (
 	delay    = flag.Duration("delay", 10*time.Second, "Benchmark interval")
 	maxRate  = flag.Int("rate", 10000, "Max Benchmark Rate(rps)")
 	insecure = flag.Bool("insecure", false, "Ignore TLS errors")
+	http2    = flag.Bool("http2", true, "Enable HTTPS2")
 	debug    = flag.Bool("debug", false, "Output Debug Logs")
 	output   = flag.String("output", "text", "Output format [text, json]")
 )
@@ -87,7 +88,10 @@ func main() {
 	})
 
 	tlsc := tls.Config{InsecureSkipVerify: *insecure}
-	attacker := vegeta.NewAttacker(vegeta.TLSConfig(&tlsc))
+	attacker := vegeta.NewAttacker(
+		vegeta.TLSConfig(&tlsc),
+		vegeta.HTTP2(*http2),
+	)
 
 	metrics := binarrySearch(*attacker, targeter, *maxRate, *duration, *delay)
 	if *output == "json" {
